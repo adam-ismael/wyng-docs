@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwyng_docs=self.webpackChunkwyng_docs||[]).push([[631],{4194:function(s){s.exports=JSON.parse('{"allTagsPath":"/wyng-docs/blog/tags","slug":"/wyng-docs/blog/tags/docusaurus","name":"docusaurus","count":4,"permalink":"/wyng-docs/blog/tags/docusaurus"}')}}]);

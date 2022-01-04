@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwyng_docs=self.webpackChunkwyng_docs||[]).push([[970],{515:function(e){e.exports=JSON.parse('{"permalink":"/wyng-docs/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"previousPage":null,"nextPage":null,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);

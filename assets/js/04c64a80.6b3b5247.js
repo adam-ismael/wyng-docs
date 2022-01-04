@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwyng_docs=self.webpackChunkwyng_docs||[]).push([[362],{6147:function(s){s.exports=JSON.parse('{"allTagsPath":"/wyng-docs/blog/tags","slug":"/wyng-docs/blog/tags/hello","name":"hello","count":2,"permalink":"/wyng-docs/blog/tags/hello"}')}}]);
