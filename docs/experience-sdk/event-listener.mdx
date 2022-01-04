@@ -1,0 +1,1104 @@
+---
+title: Event Listener
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+Attach a callback function (listener) to a given campaign event,
+in order to run custom js code when a specific event happens.
+For instance the `individual_entry_expanded` event allows developer to run
+custom code whenever a user expands an entry from a gallery.
+
+## Listening for Campaign Events
+Events are a simple way of notifying listeners that something has taken place.
+There are many notable events in a campaign flow that developers can and should
+take action on in order to create more custom experiences. Some events may be as
+simple as a state change, while others pass useful data along with it. By
+emitting and listening to events, developers can begin adding functionality on
+top of out-of-box campaigns without adding complexity.
+
+### Examples
+
+#### Adding an event listener callback
+
+The EventEmitter is able to register a callback for a given eventType.
+Any eventType can be registered. However, only eventTypes that the campaign
+emits will ever be invoked. This example shows how external developers can
+leverage the Wyng SDK to register event listeners to the EventEmitter.
+
+```js
+function listener(event) {
+    // custom javascript code
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('form_submit_success', listener);
+```
+
+#### Removing an event listener callback
+
+Calling addEventListener will return an anonymous function that can remove the
+listener when called. This example shows how external developers can leverage the
+Wyng SDK to remove a previously registered event listener from the EventEmitter.
+
+Note: future iterations can introduce a formal api for removing event listeners
+through removeEventListener.
+
+```js
+function listener(event) {
+    // custom javascript code
+}
+
+const removeEventListener = window.wyng['_WYNG_ID_'].addEventListener('form_submit_success', listener);
+
+removeEventListener(); // remove event listener
+```
+
+## Supported Events
+- [Form component events](form-component-events)
+	- form_submit_button_clicked
+	- form_pre_submission
+	- form_submit_success
+	- form_submit_error
+	- form_field_changed
+	- form_identity_verification_started
+	- form_identity_verification_success
+	- form_identity_verification_failed
+
+- FlexGrid component (v2) events:
+	- individual_entry_expanded
+	- individual_entry_was_expanded
+	- flex_grid_displaying_content_changed
+	- flex_grid_new_content_added
+
+- Reward component events:
+	- reward_code_issued
+	- reward_code_not_issued
+
+- General events:
+	- campaign_loaded
+	- page_loaded
+
+- Quiz component events:
+	- quiz_new_step_shown
+	- quiz_new_result_shown
+
+- Upload component events:
+	- upload_editor_opened
+	- upload_form_opened
+	- upload_warning_shown
+	- upload_closed
+	- upload_editor_tab_clicked
+	- upload_editor_drawer_hidden
+	- upload_editor_item_added
+	- upload_editor_text_changed
+	- upload_editor_image_loaded
+
+- Gallery component (v1 - **deprecated**) events:
+	- individual_entry_expanded
+
+- Gallery component (v2 - **deprecated**) events:
+	- individual_entry_expanded (event payload params is the same as for FlexGrid above)
+
+:::danger
+All events are generic and may be emitted for **any component** in a campaign.
+It is up to the implementation to filter out any individual form components needed.
+
+**All code snippets in this documentation will have an example of such filtering.**
+:::
+
+## Form component Events
+
+### Form Submit Success
+Form submissions are one of the most powerful features as they capture user
+information. Callbacks that are registered to this event will be invoked after
+a form has been successfully submitted.
+
+#### Event payload example
+```js
+{
+    eventType: 'form_submit_success',
+    componentId: 'sign_up_4137542896361',
+    email: 'john@smith.com',
+    fields: [
+        {answer: true, field_type: 'opt_in', name: 'opt_in_7340448925344'},
+        {answer: 'john@smith.com', field_type: 'email', name: 'email_address_7615019884892'}
+    ]
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function signupSuccessCallback(event) {
+    if (event.componentId === 'sign_up_4137542896361') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('form_submit_success', signupSuccessCallback);
+```
+
+### Form Submit Button Clicked
+Event generated when clicking the form's submit button.
+Callbacks that are registered to this event will be invoked after the submit button was clicked but before the actual submission calls happened.
+Event will be emitted regardless of the validation status of the form. If you need to target an event after front-end validation has happened refer to `form_pre_submission`.
+
+#### Event payload example
+```js
+{
+    component_id: 'sign_up_4137542896361', // The ID of the parent form component
+    fields: [
+        {answer: true, field_type: 'opt_in', name: 'opt_in_7340448925344'},
+        {answer: 'john@smith.com', field_type: 'email', name: 'email_address_7615019884892'}
+    ]
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function submitClickedCallback(event) {
+    if (event.componentId === 'sign_up_4137542896361') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('form_submit_button_clicked', submitClickedCallback);
+```
+
+### Form Pre Submission
+Callbacks that are registered to this event will be invoked after the submit button was clicked and right before the submission call.
+It will be emitted after all the steps that can happen after clicking the submit button (front-end field validation, captcha solving, identity verification…), but before the actual submission calls happened.
+
+#### Event payload example
+```js
+{
+    component_id: 'sign_up_4137542896361', // The ID of the parent form component
+    fields: [
+        {answer: true, field_type: 'opt_in', name: 'opt_in_7340448925344'},
+        {answer: 'john@smith.com', field_type: 'email', name: 'email_address_7615019884892'}
+    ]
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function submitClickedCallback(event) {
+    if (event.componentId === 'sign_up_4137542896361') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('form_pre_submission', submitClickedCallback);
+```
+
+### Form Submit Clicked
+
+Deprecated and renamed to [`form_pre_submission`](#form-pre-submission).
+
+
+### Form Submit Error
+Event generated on unsuccessful form submission. Callbacks that are registered to this
+event will be invoked after a form submit failed.
+
+#### Event payload example
+```js
+{
+    eventType: 'form_submit_error',
+    componentId: 'sign_up_4137542896361', // component id of a parent
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function signupErrorCallback(event) {
+    if (event.componentId === 'sign_up_4137542896361') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('form_submit_error', signupErrorCallback);
+```
+
+### Form Field Changed
+Event generated when a field value has changed. This event is similar to a [blur event](https://developer.mozilla.org/en-US/docs/Web/API/Element/blur_event) and happens when a field loses focus.
+As such it will not trigger on every keystrokes of a text field for instance.
+
+#### Event payload example
+```js
+{
+    component_id: 'sign_up_4137542896361', // The ID of the parent form component
+    field: {
+        name: "email_address_7015860614732",
+        field_type: "email",
+        is_deleted: false,
+        is_hidden: false,
+        label: "Email",
+        required: true,
+    },
+    target: {
+        // Forwarded DOMEventTarget
+        // @see https://dom.spec.whatwg.org/#ref-for-dom-event-target%E2%91%A2
+    }
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function fieldChangedCallback(event) {
+    if (
+		event.componentId === 'sign_up_4137542896361'
+		&& event.field.name === 'email_address_701586061473'
+	) {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('form_field_changed', fieldChangedCallback);
+```
+
+## FlexGrid component Events
+
+### Individual Entry Expanded
+Content metadata is passed in individual_entry_expanded event that gets emitted
+when expanding individual entry in gallery or carousel components. It helps
+developers customizing expanded view and taking advantage of content metadata.
+
+#### Event Payload
+
+| Key                                               | Type      | Description                                                                                                                           | Example                                    |
+|---------------------------------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| `componentId`                                     | `string`  | ID of the component that emitted the event                                                                                            | `gallery_4137542896361`                    |
+| `contentStream`                                   | `string`  | ID of the content stream                                                                                                              | `"b7625b6e-1497-40c3-b118-1583b617d1ab"`   |
+| `expandedIndex`                                   | `integer` | index of the exapnded UGC item                                                                                                        | `2`                                        |
+| `tilesCount`                                      | `integer` | Number of visible tiles                                                                                                               | `10`                                       |
+| `totalResults`                                    | `integer` | Total number of items in selected saved filter                                                                                         | `120`                                      |
+| `isAllContentDisplayed`                           | `boolean` | indicates if all content (ugc items) was loaded and displayed to a user (assuming that only whole lines of content are displayed now) | `false`                                    |
+| `ugcObject`                                       | `object`  | Object representation of the expanded content                                                                                         | *See below*                                |
+| `ugcObject.id`                                    | `integer` | ID of the UGC item                                                                                                                    | `7992013`                                  |
+| `ugcObject.translations`                          | `object`  | Available translation units for the UGC item                                                                                          | `{}`                                       |
+| `ugcObject.activate_units`                        | `array`   | List of activation unit objects                                                                                                       | `[]`                                       |
+| `ugcObject.submission`                            | `object`  | Submission details if the image is UGC from a campaign                                                                                | `{}`                                       |
+| `ugcObject.hashtag`                               | `object`  | Injested Hashtag Details                                                                                                              | *See below*                                |
+| `ugcObject.hashtag.social_platform`               | `string`  | The platform the hashtag was ingested from                                                                                            | `instagram`                                |
+| `ugcObject.hashtag.hashtag_text`                  | `string`  | The hashtag content (without the # sign)                                                                                              | `nofilter`                                  |
+| `ugcObject.featured`                              | `boolean` | Indicates if this specific UGC item is a featured item                                                                                 | `false`                                    |
+| `ugcObject.approval_status`                       | `string`  | The approval status of the UGC item. Should be `app` if the content has been approved                                                 | `app`                                      |
+| `ugcObject.shortened_permalink`                   | `string`  | Permalink if it has been generated                                                                                                    | `https://perma.link/123`                   |
+| `ugcObject.last_modified`                          | `string`  | ISO 8601 Timestamp of last modification                                                                                                | `2020-11-23T21:51:54+00:00`                |
+| `ugcObject.created_on`                            | `string`  | ISO 8601 Timestamp of creation                                                                                                        | `2020-11-23T21:51:54+00:00`                |
+| `ugcObject.tags`                                  | `object`  | UGC Tags Details                                                                                                                      | *See below*                                |
+| `ugcObject.tags.hashtags`                         | `array`   | List of all the tags associated                                                                                                       | `['nofilter', 'foodporn']`                  |
+| `ugcObject.content`                               | `object`  | Additional content details                                                                                                            | *See below*                                |
+| `ugcObject.content.content_type`                  | `string`  | **image** or **video** or **text**                                                                                                    | `image`                                    |
+| `ugcObject.content.media`                         | `object`  | Additional media infos                                                                                                                | *See below*                                |
+| `ugcObject.content.media.id`                      | `integer` | Internal ID of the media                                                                                                              | `1234`                                     |
+| `ugcObject.content.media.platform_data.url`       | `string`  | Link to the original post/media                                                                                                       | `https://www.instagram.com/p/CX328Pth82W/` |
+| `ugcObject.content.media.original_url`            | `string`  | URL of the original image **on Wyng servers**,                                                                                        | `https://cdn.wyng.com/i123/image.jpg`      |
+| `ugcObject.content.media.base_url`                | `string`  | URL of the folder containing the images,                                                                                              | `https://cdn.wyng.com/i123`                |
+| `ugcObject.content.media.media_type`              | `string`  | **image** or **video** or **text**                                                                                                    | `image`                                    |
+| `ugcObject.content.media.social_platform`         | `string`  | The platform the image was ingested from (**instagram**, **twitter**…)                                                                | `instagram`                                |
+| `ugcObject.content.media.media_urls`              | `object`  | Object containing links to the available image sizes                                                                                  | *See below*                                |
+| `ugcObject.content.media.media_urls.large_image`  | `string`  | Direct URL to the image in the largest format                                                                                         | `https://cdn.wyng.com/i123/image_1.jpg`    |
+| `ugcObject.content.media.media_urls.medium_image` | `string`  |                                                                                                                                       | `https://cdn.wyng.com/i123/image_2.jpg`    |
+| `ugcObject.content.media.media_urls.small_image`  | `string`  |                                                                                                                                       | `https://cdn.wyng.com/i123/image_3.jpg`    |
+| `ugcObject.content.social_platform`               | `string`  | The platform the image was ingested from (**instagram**, **twitter**…)                                                                | `instagram`                                |
+| `ugcObject.content.author`                        | `object`  | Author infos                                                                                                                          | *See below*                                |
+| `ugcObject.content.author.id`                     | `integer` | Wyng internal ID for this author                                                                                                      | `12312321321`                              |
+| `ugcObject.content.author.profile`                 | `object`  | Author Profile infos                                                                                                                   | *See below*                                |
+| `ugcObject.content.author.profile.username`        | `string`  | Platform Username                                                                                                                     | `beeple_crap`                              |
+| `ugcObject.content.author.profile.name`            | `string`  | Display name, might be empty on some platforms                                                                                        | `beeple`                                   |
+| `ugcObject.content.author.profile.profile_link`     | `string`  | Display name, might be empty on some platforms                                                                                        | `https://www.instagram.com/beeple_crap/`   |
+| `ugcObject.content.author.profile.avatar`          | `string`  | Link to the profile avatar                                                                                                             | `https://images.url/avatar.jpg`            |
+| `ugcObject.content.author.platform_id`            | `string`  | The ID or username of the author on the platform the content comes from                                                               | `12342141223`                              |
+| `ugcObject.content.author.social_platform`        | `string`  | The platform the image was ingested from (**instagram**, **twitter**…)                                                                | `instagram`                                |
+| `ugcObject.content.permission_modified`            | `string`  | ISO 8601 Timestamp of when the UGC permission was last modified                                                                        | `2020-11-23T21:51:54+00:00`                |
+
+
+#### Event payload example
+```js
+{
+    eventType: 'individual_entry_expanded',
+    componentId: 'gallery_4137542896361',
+    expandedIndex: 2,
+    ugcObject:
+        {
+            content: {
+                content_type: 'image'
+            }
+        }
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function entryExpandCallback(event) {
+    if (event.componentId === 'gallery_4137542896361') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('individual_entry_expanded', entryExpandCallback);
+```
+
+### Individual Entry Was Expanded
+This event is emitted when a FlexGrid modal is expanded and is fully visible on screen.
+
+#### Event Payload
+| Key                                               | Type      | Description                                                                                                                           | Example                                    |
+|---------------------------------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| `componentId`                                     | `string`  | ID of the component that emitted the event                                                                                            | `gallery_4137542896361`                    |
+| `contentStream`                                   | `string`  | ID of the content stream                                                                                                              | `"b7625b6e-1497-40c3-b118-1583b617d1ab"`   |
+| `expandedIndex`                                   | `integer` | index of the expanded UGC item                                                                                                        | `2`                                        |
+| `totalResults`                                    | `integer` | Total number of items in selected saved filter                                                                                         | `120`                                      |
+| `isAllContentDisplayed`                           | `boolean` | indicates if all content (ugc items) was loaded and displayed to a user (assuming that only whole lines of content are displayed now) | `false`                                    |
+| `ugcObject`                                       | `object`  | Object representation of the expanded content                                                                                         | *See below*                                |
+| `ugcObject.id`                                    | `integer` | ID of the UGC item                                                                                                                    | `7992013`                                  |
+| `ugcObject.translations`                          | `object`  | Available translation units for the UGC item                                                                                          | `{}`                                       |
+| `ugcObject.activate_units`                        | `array`   | List of activation unit objects                                                                                                       | `[]`                                       |
+| `ugcObject.submission`                            | `object`  | Submission details if the image is UGC from a campaign                                                                                | `{}`                                       |
+| `ugcObject.hashtag`                               | `object`  | Injested Hashtag Details                                                                                                              | *See below*                                |
+| `ugcObject.hashtag.social_platform`               | `string`  | The platform the hashtag was ingested from                                                                                            | `instagram`                                |
+| `ugcObject.hashtag.hashtag_text`                  | `string`  | The hashtag content (without the # sign)                                                                                              | `nofilter`                                  |
+| `ugcObject.featured`                              | `boolean` | Indicates if this specific UGC item is a featured item                                                                                 | `false`                                    |
+| `ugcObject.approval_status`                       | `string`  | The approval status of the UGC item. Should be `app` if the content has been approved                                                 | `app`                                      |
+| `ugcObject.shortened_permalink`                   | `string`  | Permalink if it has been generated                                                                                                    | `https://perma.link/123`                   |
+| `ugcObject.last_modified`                          | `string`  | ISO 8601 Timestamp of last modification                                                                                                | `2020-11-23T21:51:54+00:00`                |
+| `ugcObject.created_on`                            | `string`  | ISO 8601 Timestamp of creation                                                                                                        | `2020-11-23T21:51:54+00:00`                |
+| `ugcObject.tags`                                  | `object`  | UGC Tags Details                                                                                                                      | *See below*                                |
+| `ugcObject.tags.hashtags`                         | `array`   | List of all the tags associated                                                                                                       | `['nofilter', 'foodporn']`                  |
+| `ugcObject.content`                               | `object`  | Additional content details                                                                                                            | *See below*                                |
+| `ugcObject.content.content_type`                  | `string`  | **image** or **video** or **text**                                                                                                    | `image`                                    |
+| `ugcObject.content.media`                         | `object`  | Additional media infos                                                                                                                | *See below*                                |
+| `ugcObject.content.media.id`                      | `integer` | Internal ID of the media                                                                                                              | `1234`                                     |
+| `ugcObject.content.media.platform_data.url`       | `string`  | Link to the original post/media                                                                                                       | `https://www.instagram.com/p/CX328Pth82W/` |
+| `ugcObject.content.media.original_url`            | `string`  | URL of the original image **on Wyng servers**,                                                                                        | `https://cdn.wyng.com/i123/image.jpg`      |
+| `ugcObject.content.media.base_url`                | `string`  | URL of the folder containing the images,                                                                                              | `https://cdn.wyng.com/i123`                |
+| `ugcObject.content.media.media_type`              | `string`  | **image** or **video** or **text**                                                                                                    | `image`                                    |
+| `ugcObject.content.media.social_platform`         | `string`  | The platform the image was ingested from (**instagram**, **twitter**…)                                                                | `instagram`                                |
+| `ugcObject.content.media.media_urls`              | `object`  | Object containing links to the available image sizes                                                                                  | *See below*                                |
+| `ugcObject.content.media.media_urls.large_image`  | `string`  | Direct URL to the image in the largest format                                                                                         | `https://cdn.wyng.com/i123/image_1.jpg`    |
+| `ugcObject.content.media.media_urls.medium_image` | `string`  |                                                                                                                                       | `https://cdn.wyng.com/i123/image_2.jpg`    |
+| `ugcObject.content.media.media_urls.small_image`  | `string`  |                                                                                                                                       | `https://cdn.wyng.com/i123/image_3.jpg`    |
+| `ugcObject.content.social_platform`               | `string`  | The platform the image was ingested from (**instagram**, **twitter**…)                                                                | `instagram`                                |
+| `ugcObject.content.author`                        | `object`  | Author infos                                                                                                                          | *See below*                                |
+| `ugcObject.content.author.id`                     | `integer` | Wyng internal ID for this author                                                                                                      | `12312321321`                              |
+| `ugcObject.content.author.profile`                 | `object`  | Author Profile infos                                                                                                                   | *See below*                                |
+| `ugcObject.content.author.profile.username`        | `string`  | Platform Username                                                                                                                     | `beeple_crap`                              |
+| `ugcObject.content.author.profile.name`            | `string`  | Display name, might be empty on some platforms                                                                                        | `beeple`                                   |
+| `ugcObject.content.author.profile.profile_link`     | `string`  | Display name, might be empty on some platforms                                                                                        | `https://www.instagram.com/beeple_crap/`   |
+| `ugcObject.content.author.profile.avatar`          | `string`  | Link to the profile avatar                                                                                                             | `https://images.url/avatar.jpg`            |
+| `ugcObject.content.author.platform_id`            | `string`  | The ID or username of the author on the platform the content comes from                                                               | `12342141223`                              |
+| `ugcObject.content.author.social_platform`        | `string`  | The platform the image was ingested from (**instagram**, **twitter**…)                                                                | `instagram`                                |
+| `ugcObject.content.permission_modified`            | `string`  | ISO 8601 Timestamp of when the UGC permission was last modified                                                                        | `2020-11-23T21:51:54+00:00`                |
+
+#### Event payload example
+```js
+{
+    eventType: 'individual_entry_was_expanded',
+    componentId: 'flex_grid_2340193501679',
+    expandedIndex: 2,
+    isAllContentDisplayed: false,
+    tilesCount: 5,
+    overallCount: 30,
+    totalResults: 37,
+    ugcObject:
+        {
+            content: {
+                content_type: 'image'
+            }
+        }
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function entryExpandCallback(event) {
+    if (event.componentId === '"flex_grid_2340193501679"') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('individual_entry_was_expanded', entryExpandCallback);
+```
+
+### Displaying Content Changed
+This event is emitted when the content displayed in the flex grid gallery changes. For instance when the user resizes the browser.
+
+#### Event Payload
+| Key                                               | Type      | Description                                                                                                                           | Example                                    |
+|---------------------------------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| `componentId`                                     | `string`  | ID of the component that emitted the event                                                                                            | `gallery_4137542896361`                    |
+| `contentStream`                                   | `string`  | ID of the content stream                                                                                                              | `b7625b6e-1497-40c3-b118-1583b617d1ab`   |
+| `tilesCount`                                      | `integer` | Number of visible tiles                                                                                                               | `16`                                       |
+| `overallCount`                                    | `integer` | Number of loaded ugc items                                                                                                            | `32`                                       |
+| `totalResults`                                    | `integer` | Total number of items in selected saved filter                                                                                         | `123`                                      |
+| `isAllContentDisplayed`                           | `boolean` | indicates if all content (ugc items) was loaded and displayed to a user (assuming that only whole lines of content are displayed now) | `false`                                    |
+
+#### Event payload example
+```js
+	{
+		"componentId": "flex_grid_588222191538",
+		"contentStream": "b7625b6e-1497-40c3-b118-1583b617d1ab",
+		"tilesCount": 16,
+		"overallCount": 30,
+		"totalResults": 134,
+		"isAllContentDisplayed": false,
+		"eventType": "flex_grid_displaying_content_changed",
+		"experienceId": "61d495372724b904f6c738c5"
+	}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function contentChangedCallback(event) {
+    if (event.componentId === 'flex_grid_123456789') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('flex_grid_displaying_content_changed', contentChangedCallback);
+```
+
+### New Content Added
+This event is dispatched when new content is added to the FlexGrid Gallery, either with Infinite Scroll or after a user clicked on the `Load More` button.
+
+
+#### Event Payload
+| Key                                               | Type      | Description                                                                                                                           | Example                                    |
+|---------------------------------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| `componentId`                                     | `string`  | ID of the component that emitted the event                                                                                            | `gallery_4137542896361`                    |
+| `contentStream`                                   | `string`  | ID of the content stream                                                                                                              | `b7625b6e-1497-40c3-b118-1583b617d1ab`   |
+| `tilesCount`                                      | `integer` | Number of visible tiles                                                                                                               | `16`                                       |
+| `overallCount`                                    | `integer` | Number of loaded ugc items                                                                                                            | `32`                                       |
+| `totalResults`                                    | `integer` | Total number of items in selected saved filter                                                                                         | `123`                                      |
+| `isAllContentDisplayed`                           | `boolean` | indicates if all content (ugc items) was loaded and displayed to a user (assuming that only whole lines of content are displayed now) | `false`                                    |
+
+
+#### Event payload example
+```js
+{
+    tilesCount: 25,
+    overallCount: 34,
+    totalResults: 87,
+    isAllContentDisplayed: false,
+    componentId: "flex_grid_123456789",
+    eventType: "flex_grid_new_content_added",
+    contentStream: "a123456-1a1b-78ab-aa00-abcdef1ghi23",
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function newContentAddedCallback(event) {
+    if (event.componentId === 'flex_grid_123456789') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('flex_grid_new_content_added', newContentAddedCallback);
+```
+
+## General Events
+### Campaign Loaded
+Content metadata is passed in `campaign_loaded` event that gets emitted when the campaign is finished loading.
+
+#### Event payload example
+```js
+{
+    componentId: 'gallery_4137542896361',
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function successfulCallback(event) {
+    if (event.componentId === 'gallery_4137542896361') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('campaign_loaded', successfulCallback);
+```
+
+### Page Loaded
+Content metadata is passed in `page_loaded` event that gets emitted when the page is finished loading.
+
+#### Event payload example
+```js
+{
+    componentId: 'gallery_4137542896361',
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```js
+function successfulCallback(event) {
+    if (event.componentId === 'gallery_4137542896361') {
+        // custom javascript code
+    }
+}
+
+window.wyng['_WYNG_ID_'].addEventListener('page_loaded', successfulCallback);
+```
+
+## Reward Component Events
+### Reward Code Issued
+This event is triggered every time a reward code is issued to a user by the Reward Component.
+
+#### Event payload
+
+| Key                       | Type      | Description                                                                                        |  Example                        |
+|---------------------------|-----------|----------------------------------------------------------------------------------------------------|---------------------------------|
+| `experienceId`            | `string`  | ID of the experience that emitted the event                                                        | `61c4a785af47070010b4a9c9`      |
+| `componentId`             | `string`  | ID of the component that emitted the event                                                         | `reward_12345678`               |
+| `eventType`               | `string`  | Will always be `reward_code_issued`                                                                | `reward_code_issued`            |
+| `sourceId`                | `string`  | ID of the answered form that triggered the reward                                                  | `sign_up_12345678`              |
+| `identifier`               | `string`  | Email / Identifier of the user that reward a code                                                   | `john.doe@wyng.com`             |
+| `isReminder`              | `boolean` | Will be set to true if a user has already won and gets the same code displayed again as a reminder | `false`                         |
+| `claimedAt`               | `string`  | Datetime string when the code was claimed                                                          | `2021-12-29T23:49:48`           |
+| `coupon`                  | `object`  | Informations related to the distributed coupon                                                     | *See example below*             |
+| `coupon.label`            | `string`  | Coupon name                                                                                        | `20% Off first order`            |
+| `coupon.value`            | `string`  | Coupon value                                                                                       | `20OFF`                         |
+| `collection`              | `object`  | Configuration options of the reward component                                                       | *See example below*             |
+| `collection.isInstantWin` | `boolean` | `true` if component configured as Instant Win                                                       | `false`                         |
+| `collection.label`        | `string`  | Name of the Code Collection the component is using                                                 | `20% Coupons`                   |
+| `collection.startTime`    | `int`     | Start of the redemption period as a milisecond Unix Timestamp                                      | `1639545600000`                 |
+| `collection.endTime`      | `int`     | End of the redemption period as a milisecond Unix Timestamp                                        | `1640930400000`                 |
+| `collection.value`        | `string`  | Internal ID of the code validator                                                                  | `61ca213387aad0e932924206`      |
+| `collection.extra`        | `object`  | Additional configuration options                                                                    | `{ redemption_policy: "once" }` |
+
+#### Event Payload Example
+
+```js
+{
+    experienceId: "61c4a785af47070010b4a9c9",
+    componentId: "reward_12345678",
+    eventType: "reward_code_issued",
+    sourceId: "sign_up_12345678",
+	coupon: { value: 'CODE25', label: '25% off' },
+    collection: {
+        isInstantWin: false,
+        label: "Your Code Library Name",
+        startTime: 1639545600000,
+        endTime: 1640930400000,
+        extra: {
+            redemption_policy: "once",
+        },
+        value: "61ca213387aad0e932924206",
+    },
+    identifier: "john.doe@wyng.com",
+    isReminder: false,
+    claimedAt: "2021-12-29T23:49:48"
+}
+```
+
+### Reward Code Not Issued
+This event is triggered when the reward component does not issue a coupon code after a successful form submission
+
+#### Event payload
+
+| Key                       | Type      | Description                                                                                        |  Example                        |
+|---------------------------|-----------|----------------------------------------------------------------------------------------------------|---------------------------------|
+| `experienceId`            | `string`  | ID of the experience that emitted the event                                                        | `61c4a785af47070010b4a9c9`      |
+| `componentId`             | `string`  | ID of the component that emitted the event                                                         | `reward_12345678`               |
+| `eventType`               | `string`  | Will always be `reward_code_not_issued`                                                            | `reward_code_not_issued`        |
+| `sourceId`                | `string`  | ID of the answered form that triggered the reward                                                  | `sign_up_12345678`              |
+| `errorMessage`            | `string`  | Reason why no code was issued. **Refer to reasons list below**.                                    | `No Active Codes`               |
+| `collection`              | `object`  | Configuration options of the reward component                                                       | *See example below*             |
+| `collection.isInstantWin` | `boolean` | `true` if component configured as Instant Win                                                       | `false`                         |
+| `collection.label`        | `string`  | Name of the Code Collection the component is using                                                 | `20% Coupons`                   |
+| `collection.startTime`    | `int`     | Start of the redemption period as a milisecond Unix Timestamp                                      | `1639545600000`                 |
+| `collection.endTime`      | `int`     | End of the redemption period as a milisecond Unix Timestamp                                        | `1640930400000`                 |
+| `collection.value`        | `string`  | Internal ID of the code validator                                                                  | `61ca213387aad0e932924206`      |
+| `collection.extra`        | `object`  | Additional configuration options                                                                    | `{ redemption_policy: "once" }` |
+
+#### Event payload example
+```js
+{
+    experienceId: "61c4a785af47070010b4a9c9",
+    componentId: "reward_12345678",
+    eventType: "reward_code_not_issued",
+    sourceId: "sign_up_12345678",
+    collection: {
+        isInstantWin: false,
+        label: "Your Code Library Name",
+        startTime: 1639545600000,
+        endTime: 1640930400000,
+        extra: {
+            redemption_policy: "once",
+        },
+        value: "61ca213387aad0e932924206",
+    },
+    errorMessage: 'No Active Codes',
+}
+```
+
+**Error Messages List**
+
+| Message                                            | Description                                                                                                    |
+|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| **No active codes**                                | The code collection has ran out of codes to issue                                                              |
+| **Code Collection inactive**                       |                                                                                                                |
+| **Instant Win Loss**                               |                                                                                                                |
+| **Code already claimed**                           | User has already won a coupon code and cannot win again (Instant Win only)                                     |
+| **Coupon Validation Failed**                       | The token sent to the API cannot be decoded and might have been tampered with                                  |
+| **Coupon Validation outside of redemption period** | Returned when a user submits a form outside of the redemption period configured in the Reward component config   |
+
+## Quiz Component Events
+### Quiz Question Answered
+This event is triggered when a user clicks on an answer in a questionnaire.
+
+**Event payload example for question**
+```js
+{
+    eventType: "quiz_question_answered",
+    component_id: 'quiz_1234567890',
+    question_text: 'Question 3',
+    question_id: 'question_id_3',
+    question_number: 3,
+    answer_id: 'question_3_answer_id_1',
+    answer_text: 'answer text',
+    quiz_summary: {
+        question_id_1: ['question_1_answer_id_2'],
+        question_id_2: ['question_2_answer_id_4'],
+    },
+    total_questions: 5,
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function quizNewStepCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('quiz_question_answered', quizNewStepCallback);
+```
+
+### Quiz new step shown
+This event is triggered when quiz component goes to a new step.
+Types of steps:
+* question
+* fact
+* result
+* scoreboard
+* quiz_form_section
+
+#### Event payload example
+
+<Tabs>
+<TabItem value="payload-question" label="Question" default>
+
+```js
+{
+    currentQuestionIndex: 0,
+    eventType: "quiz_new_step_shown",
+    id: "question_3989579239",
+    questionText: "New Question",
+    totalQuestions: 2,
+    type: "question"
+}
+```
+
+</TabItem>
+<TabItem value="payload-fact" label="Fact">
+
+```js
+{
+    currentQuestionIndex: undefined,
+    eventType: "quiz_new_step_shown",
+    id: "question_3989579239",
+    questionText: undefined,
+    totalQuestions: 2,
+    type: "fact"
+}
+```
+
+</TabItem>
+<TabItem value="payload-result" label="Result">
+
+```js
+{
+    currentQuestionIndex: undefined,
+    eventType: "quiz_new_step_shown",
+    id: "question_3989579239",
+    questionText: undefined,
+    totalQuestions: 2,
+    type: "result"
+}
+```
+
+</TabItem>
+<TabItem value="payload-scoreboard" label="Scoreboard">
+
+```js
+{
+    currentQuestionIndex: undefined,
+    eventType: "quiz_new_step_shown",
+    id: "question_3989579239",
+    questionText: undefined,
+    totalQuestions: 2,
+    type: "scoreboard"
+}
+```
+
+</TabItem>
+<TabItem value="payload-form" label="Form">
+
+```js
+{
+    currentQuestionIndex: undefined,
+    eventType: "quiz_new_step_shown",
+    id: "question_3989579239",
+    questionText: undefined,
+    totalQuestions: 2,
+    type: "quiz_form_section"
+}
+```
+
+</TabItem>
+</Tabs>
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function quizNewStepCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('quiz_new_step_shown', quizNewStepCallback);
+```
+### Quiz new result shown
+Two events are triggered when the quiz component is completed and reaches the result step.
+* `quiz_new_result_calculated` is emitted right after a quiz result gets calculated, before it is displayed to the user (useful with **redirect** result behaviors).
+* `quiz_new_result_shown` is emitted once the result has been displayed to the user.
+
+#### Event payload
+Both event have the same payload and the callback will recieve a object containing the following properties
+
+
+| Key              | Type                 | Description                                                                                                                                                                                                                                                   |  Example                       |
+|------------------|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
+| `id`             | `string`             | ID of the component that emitted the event                                                                                                                                                                                                                    | `quiz_123456`                  |
+| `resultId`       | `string`             | The ID of the result that is displayed to the user                                                                                                                                                                                                            | `result_123456`                |
+| `behavior`       | `string`             | The type of result displayed.<br />One of: <ul><li>*default*: The default type option (**Display content** in the builder)</li><li>*experience_page*: redirect to a new page from the experience</li><li>*url*: redirect to an external URL</li></ul>         | `experience_page`              |
+| `outcomeType`    | `string`             | How the result was calculated.<br />One of: <ul><li>*weighted matching*: Weighted match by specific answers</li><li>*correctness*: Match by number of correct answers</li><li>*matching*: Match by specific answers</li><li>*default*: Default Result</li></ul> | `correctness`                  |
+| `name`           | `string`             | Result's name                                                                                                                                                                                                                                                 | `Congrats!`                    |
+| `description`    | `string`             | Result's description. Used when the behavior is **default**.                                                                                                                                                                                                  | `You won!`                     |
+| `redirectUrl`    | `string`, `undefined` | The redirect's URL if `behavior` is **url**.                                                                                                                                                                                                                  | `https://youtu.be/dQw4w9WgXcQ` |
+| `redirectPageId` | `string`, `undefined` | The redirect's page ID if `behavior` is **experience_page**.                                                                                                                                                                                                  | `page_1234567`                 |
+| `image`          | `object`             | Result's description. Used when the behavior is **default**.                                                                                                                                                                                                  | *See example below*            |
+| `image.link`     | `string`             | The image's URL.                                                                                                                                                                                                                                              | `https://images.url/image.jpg` |
+| `image.name`     | `string`             | The image's name.                                                                                                                                                                                                                                             | `winning_image.jpg`            |
+| `quizSummary`    | `object`             | Summary of the questions answered by the user.<ul><li>*Key* is the question_id as a **String**</li><li>*Value* is an **Array** of the the answers id</li></ul>                                                                                                | *See example below*            |
+
+
+
+#### Event payload example for question
+```js
+{
+    id: "quiz_123456",
+    resultId: "result_123456",
+    name: "Congrats!"
+    behavior: "default"
+    description: "You won.",
+    outcomeType: "correctness",
+    image: {
+        link: "http://www.fillmurray.com/g/200/300",
+        name: "photo-12345678.jpeg",
+    },
+    redirectPageId: undefined,
+    redirectUrl: undefined,
+    quizSummary: {
+        question_123456: [
+            "answer_123456"
+        ],
+        question_789: [
+            "answer_123",
+            "answer_456"
+        ],
+    }
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+
+```javascript
+function quizNewResultCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('quiz_new_result_shown', quizNewResultCallback);
+```
+
+## Upload component events
+
+
+### Upload editor opened
+This event is triggered when user reaches "Editor" step in "Image Upload" or "Video Upload"
+component.
+
+#### Event payload example
+<Tabs>
+<TabItem value="photo" label="Photos" default>
+
+```js
+{
+  contentType: "photos"
+}
+```
+
+</TabItem>
+<TabItem value="video" label="Video">
+
+```js
+{
+  contentType: "video"
+}
+```
+</TabItem>
+</Tabs>
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadEditorOpenedCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_editor_opened', uploadEditorOpenedCallback);
+```
+
+### Upload form opened
+This event is triggered when user reaches "Form" step in "Image Upload" or "Video Upload"
+component. **It doesn't have payload.**
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadFormOpenedCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_form_opened', uploadFormOpenedCallback);
+```
+
+### Upload warning shown
+This event is triggered when user reaches "Warning" step (sees “Are you sure” confirm message
+when clicking to exit) in "Image Upload" or "Video Upload" component. **It doesn't have payload.**
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadWarningShownCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_warning_shown', uploadWarningShownCallback);
+```
+
+### Upload closed
+This event is triggered when user exits upload component (either image or video).
+**It doesn't have payload.**
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadClosedCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_closed', uploadClosedCallback);
+```
+
+### Upload editor tab clicked
+This event is triggered when user clicks a tab on "Editor" step in "Image Upload" or "Video Upload"
+component.
+
+#### Event payload example
+
+<Tabs>
+<TabItem value="photo" label="Photos" default>
+
+```js
+{
+  tab: "photos"
+}
+```
+
+</TabItem>
+<TabItem value="video" label="Video">
+
+```js
+{
+  tab: "video"
+}
+```
+</TabItem>
+<TabItem value="stickers" label="Stickers">
+
+```js
+{
+  tab: "stickers"
+}
+```
+</TabItem>
+<TabItem value="frames" label="Frames">
+
+```js
+{
+  tab: "frames"
+}
+```
+</TabItem>
+<TabItem value="text" label="Text">
+
+```js
+{
+  tab: "text"
+}
+```
+</TabItem>
+</Tabs>
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadEditorTabClickedCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_editor_tab_clicked', uploadEditorTabClickedCallback);
+```
+
+### Upload editor drawer hidden
+This event is triggered when tab content is hidden on "Editor" step in "Image Upload" or
+"Video Upload" component.
+
+#### Event payload example
+<Tabs>
+<TabItem value="photo" label="Photos" default>
+
+```js
+{
+  tab: "photos"
+}
+```
+
+</TabItem>
+<TabItem value="video" label="Video">
+
+```js
+{
+  tab: "video"
+}
+```
+</TabItem>
+<TabItem value="stickers" label="Stickers">
+
+```js
+{
+  tab: "stickers"
+}
+```
+</TabItem>
+<TabItem value="frames" label="Frames">
+
+```js
+{
+  tab: "frames"
+}
+```
+</TabItem>
+<TabItem value="text" label="Text">
+
+```js
+{
+  tab: "text"
+}
+```
+</TabItem>
+</Tabs>
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadEditorDrawerHiddenCallback(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_editor_drawer_hidden', uploadEditorDrawerHiddenCallback);
+```
+
+### Upload editor item added
+This event is triggered when user drops a sticker, frame on "Editor" step in
+"Image Upload" or "Video Upload" component. URL points to asset.
+
+#### Event payload example
+<Tabs>
+<TabItem value="stickers" label="Stickers">
+
+```js
+{
+  type: "stickers",
+  url: "http://web.site"
+}
+```
+</TabItem>
+<TabItem value="frames" label="Frames">
+
+```js
+{
+  type: "frames",
+  url: "http://web.site"
+}
+```
+</TabItem>
+</Tabs>
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadEditorItemAdded(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_editor_item_added', uploadEditorItemAdded);
+```
+
+### Upload editor text changed
+This event is triggered when user changes text on "Editor" step in
+"Image Upload" or "Video Upload" component.
+
+#### Event payload example
+```js
+{
+    value: "user input"
+}
+```
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadEditorTextChanged(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_editor_text_changed', uploadEditorTextChanged);
+```
+
+### Upload editor image loaded
+This event is triggered when image upload complete. We need this with “upload_editor_opened” event
+because the editor opens even if upload wasn't finished. It doesn't have payload.
+
+#### Examples
+**Adding an event listener callback**
+```javascript
+function uploadEditorImageLoaded(event) {
+    // custom javascript code
+}
+window.wyng['_WYNG_ID_'].addEventListener('upload_editor_image_loaded', uploadEditorImageLoaded);
+```

@@ -1,0 +1,366 @@
+---
+title: Action Dispatcher
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Action Dispatcher
+Dispatch an action that triggers a change in campaign.
+For instance `setPage` navigates the user to a specific page.
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(payload);
+```
+
+### Parameters
+`dispatchCampaignAction` accepts a single paramter, an object containing at least the following:
+
+| Key           | Type               | Description                                                                                                     |
+|---------------|--------------------|-----------------------------------------------------------------------------------------------------------------|
+| `componentId` | `string` - required | The id of the component you want to target, e.g. `sign_up_436366175206`.                                        |
+| `actionType`  | `string` - required | A string representing the campaign action type.                                                                 |
+
+:::tip
+Each action type has their own set of additional required keys.
+:::
+
+## Example
+This will get the value of a url parameter named **utm** from current page url, and set
+its value to a hidden value field of a Sign Up component.
+
+```js
+function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+};
+
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: "sign_up_436366175206",
+        actionType: "setAndValidateFormField",
+        fieldComponentId: "hidden_value_6664517258088",
+        fieldValue: getUrlParameter("utm")
+    }
+)
+```
+
+## Supported Components
++ Sign-up Form Component
++ Direct Upload Component
++ Gallery/Carousel
++ Quiz Component
++ FlexGrid Gallery Component
+
+## Supported Action Types
+
+### setAndValidateFormField
+Change the value of a form field and then validate the field. This value will be cleared out
+after a successful submission a.k.a. when the form values are reset. A user can
+still change this value manually.
+
+#### Additional required keys:
+
+| Key               | Type                | Description                                                         |
+|-------------------|---------------------|---------------------------------------------------------------------|
+| `actionType`      | `string` - required | Must be `setAndValidateFormField`                                   |
+| `fieldComponentId` | `string` - required | The id of the field you want to target e.g. `textarea_6570984561008` |
+| `fieldValue`       | required            | The value you want to set the field to, e.g., "Hello World".         |
+
+:::caution
+ **Note for forms in children components**: When targetting a form located within another component (Quiz, Image Upload…) make sure to set `componentId` to the ID of the form child component, e.g. `quiz_form_section_123456`.
+:::
+
+:::caution
+
+The `fieldValue` type depends on the field itself, **different field types have different value requirements.**
+
+Please refer to the examples below.
+
+:::
+
+
+
+#### Examples
+
+<Tabs>
+<TabItem value="text" label="Text" default>
+
+This example applies to **Text Input**, **Text Area** and **Hidden** field types.
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormField',
+        fieldComponentId: 'textarea_6570984561008',
+        fieldValue: 'test@example.com'
+    }
+)
+```
+
+</TabItem>
+<TabItem value="date" label="Date">
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormField',
+        fieldComponentId: 'date_3579334075255',
+        fieldValue: {
+            monthValue: '2',
+            dayValue: '27',
+            yearValue: '1992'
+        }
+    }
+)
+```
+
+</TabItem>
+<TabItem value="multiple" label="Multiple Choice">
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormField',
+        fieldComponentId: 'multiple_choice_1819084264811',
+        fieldValue: 'Choice 2'
+    }
+)
+```
+
+</TabItem>
+<TabItem value="multiselect" label="Multi-Select">
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormField',
+        fieldComponentId: 'multi_select_836826252302',
+        fieldValue: [
+            {
+                choice: 'Choice 1', // Choice value
+                id: 0,              // Index of the choice (Order it appears)
+                selected: false     // Indicates whether the choice is selected.
+            },
+            {
+                choice: 'Choice 2',
+                id: 1,
+                selected: true
+            }
+        ]
+    }
+)
+```
+
+</TabItem>
+<TabItem value="checkbox" label="Checkbox">
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormField',
+        fieldComponentId: 'checkbox_1113500351579',
+        fieldValue: true
+    }
+)
+```
+
+</TabItem>
+<TabItem value="image" label="Image">
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormField',
+        fieldComponentId: 'image_580323694217',
+        fieldValue: 'https://images.url/my_image.jpg'
+    }
+)
+```
+
+</TabItem>
+<TabItem value="radio" label="Radio">
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormField',
+        fieldComponentId: 'radio_2057578130140',
+        fieldValue: 'Choice 2'
+    }
+)
+```
+
+</TabItem>
+<TabItem value="calendar-date" label="Calendar Date">
+
+The value must either be a **Date object** or **null**.
+
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormField',
+        fieldComponentId: 'calendar_4700764868445',
+        fieldValue: new Date()
+    }
+)
+```
+
+</TabItem>
+</Tabs>
+
+### setAndValidateFormFieldDefaultValue
+Change the default value of a form field and then validate the field. This value
+will remain even after the form is reset after a successful submission. A user
+can still change this value manually.
+
+#### Additional required keys:
+
+| Key               | Type                | Description                                                         |
+|-------------------|---------------------|---------------------------------------------------------------------|
+| `actionType`      | `string` - required | Must be `setAndValidateFormFieldDefaultValue`                       |
+| `fieldComponentId` | `string` - required | The id of the field you want to target e.g. `textarea_6570984561008` |
+| `fieldValue`       | required            | The value you want to set the field to, e.g., "Hello World".         |
+
+
+
+:::caution
+ **Note for forms in children components**: When targetting a form located within another component (Quiz, Image Upload…) make sure to set `componentId` to the ID of the form child component, e.g. `quiz_form_section_123456`.
+:::
+
+:::caution
+
+The `fieldValue` type depends on the field itself, **different field types have different value requirements.**
+
+Please refer to the examples listed for [**setAndValidateFormField**](#setandvalidateformfield).
+
+:::
+
+#### Examples
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: 'sign_up_436366175206',
+        actionType: 'setAndValidateFormFieldDefaultValue',
+        fieldComponentId: 'textarea_6570984561008',
+        fieldValue: 'test@example.com'
+    }
+)
+```
+
+### setPage
+Change current selected page.
+
+#### Additional required keys:
+
+| Key               | Type                | Description                                                         |
+|-------------------|---------------------|---------------------------------------------------------------------|
+| `actionType`      | `string` - required | Must be `setPage`.                                                  |
+| `pageId`          | `string` - required | The id of the page you wish to navigate to. e.g. `page_64537254`.   |
+
+:::tip
+The value of `pageId` can be found in page settings.
+:::
+
+#### Examples
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        actionType: 'setPage',
+        pageId: 'page_64537254'
+    }
+)
+```
+
+### filterContentByQuery
+Filter gallery/carousel component content. You could filter content by keyword,
+hashtag, user, tag or any other attribute that available as parameter
+for ContentAPI request in additional_query request query parameter.
+
+The query format should be the same as [Content API](https://wyng.docs.apiary.io/#introduction/typical-server-responses).
+You can find good example by inspecting network requests within the Content Tab,
+which is also using this API.
+
+#### Additional required keys:
+
+| Key               | Type                | Description                                                                                                               |
+|-------------------|---------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `actionType`      | `string` - required | Must be `filterContentByQuery`.                                                                                            |
+| `query`           | `string` - required | The [query string](https://wyng.docs.apiary.io/#introduction/typical-server-responses) e.g. `tags.marketer_tags:beach`.   |
+
+
+
+#### Examples
+Filter by marketer tag
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: "gallery_5227044097293",
+        actionType: "filterContentByQuery",
+        query: "tags.marketer_tags:beach"
+    }
+)
+```
+
+Filter with compound query
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: "gallery_5227044097293",
+        actionType: "filterContentByQuery",
+        query: "social_platform:twitter AND tags.marketer_tags:beach"
+    }
+)
+```
+
+Reset filter parameters by passing "" as query
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction(
+    {
+        componentId: "gallery_5227044097293",
+        actionType: "filterContentByQuery",
+        query: ""
+    }
+)
+```
+
+### goToPriorQuizQuestion
+Return to prior question in the "Questions" component. Usually there is only one quiz on page
+so the action does not have `component_id` key.
+
+#### Example
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction({ actionType: "goToPriorQuizQuestion" })
+```
+
+### pushTranslatedCaptionPreferredLocale
+Sets the preferred displayed locales in a flexgrid component.
+
+#### Additional required keys:
+
+| Key               | Type                | Description                                                                                                 |
+|-------------------|---------------------|-------------------------------------------------------------------------------------------------------------|
+| `actionType`      | `string` - required | Must be `pushTranslatedCaptionPreferredLocale`.                                                             |
+| `locales`         | `array` - required  | An array of [ISO 639-1 locales](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). e.g. `['fr', 'ru']` |
+| `enabled`         | `boolean`           | Enables or disables the translation feature                                                                 |
+
+#### Example
+```js
+window.wyng['_WYNG_ID_'].dispatchCampaignAction({
+    actionType: "pushTranslatedCaptionPreferredLocale",
+    locales: ['fr', 'ru'],
+    componentId: 'flex_grid_component_123456',
+    enabled: true // set this to false to disable the translation feature
+})
+```
