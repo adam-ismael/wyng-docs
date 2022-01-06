@@ -4,6 +4,27 @@
  * work well for content-centric websites.
  */
 
+@font-face {
+  font-family: CentraleSans;
+  weight: 500;
+  src: url("./fonts/CentraleSans-Medium.woff") format("woff");
+}
+@font-face {
+  font-family: CentraleSans;
+  font-weight: bold;
+  src: url("./fonts/CentraleSans-Bold.woff") format("woff");
+}
+@font-face {
+  font-family: CentraleSans;
+  font-weight: 200;
+  src: url("./fonts/CentraleSans-Light.woff") format("woff");
+}
+@font-face {
+  font-family: CentraleSans;
+  font-weight: 300;
+  src: url("./fonts/CentraleSans-Book.woff") format("woff");
+}
+
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #5c0f8c;
@@ -13,6 +34,7 @@
   --ifm-color-primary-light: rgb(101, 16, 154);
   --ifm-color-primary-lighter: rgb(106, 17, 161);
   --ifm-color-primary-lightest: rgb(120, 20, 182);
+  --ifm-font-family-base: "CentraleSans", Arial, Sans-Serif;
   --ifm-code-font-size: 95%;
 }
 
